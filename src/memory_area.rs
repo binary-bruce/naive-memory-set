@@ -8,7 +8,7 @@ use super::{map_permission::MapPermission, map_type::MapType};
 
 /// map area structure, controls a contiguous piece of virtual memory
 pub struct MapArea {
-    pub(crate) vpn_range: VPNRange,
+    pub vpn_range: VPNRange,
     data_frames: BTreeMap<VirtPageNum, FrameTracker>,
     map_type: MapType,
     map_perm: MapPermission,
