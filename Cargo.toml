@@ -1,0 +1,9 @@
+[package]
+name = "memory-set"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
+bitflags = "1.2.1"
+page-table = { git = "https://github.com/binary-bruce/naive-page-table" }
