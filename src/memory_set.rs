@@ -60,7 +60,6 @@ impl MemorySet {
         self.page_table.translate(vpn)
     }
 
-    #[allow(unused)]
     pub fn shrink_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
         if let Some(area) = self
             .areas
@@ -74,7 +73,6 @@ impl MemorySet {
         }
     }
 
-    #[allow(unused)]
     pub fn append_to(&mut self, start: VirtAddr, new_end: VirtAddr) -> bool {
         if let Some(area) = self
             .areas

@@ -32,22 +32,20 @@ impl MapArea {
     }
 
     pub fn map_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
-        let ppn: PhysPageNum;
-        match self.map_type {
-            MapType::Identical => {
-                ppn = PhysPageNum(vpn.0);
-            }
+        let ppn: PhysPageNum = match self.map_type {
+            MapType::Identical => PhysPageNum(vpn.0),
             MapType::Framed => {
                 let frame = frame_alloc().unwrap();
-                ppn = frame.ppn;
+                let ppn = frame.ppn;
                 self.data_frames.insert(vpn, frame);
+
+                ppn
             }
-        }
+        };
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits()).unwrap();
         page_table.map(vpn, ppn, pte_flags);
     }
 
-    #[allow(unused)]
     pub fn unmap_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
         if self.map_type == MapType::Framed {
             self.data_frames.remove(&vpn);
@@ -61,14 +59,12 @@ impl MapArea {
         }
     }
 
-    #[allow(unused)]
     pub fn unmap(&mut self, page_table: &mut PageTable) {
         for vpn in self.vpn_range {
             self.unmap_one(page_table, vpn);
         }
     }
 
-    #[allow(unused)]
     pub fn shrink_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
         for vpn in VPNRange::new(new_end, self.vpn_range.get_end()) {
             self.unmap_one(page_table, vpn)
@@ -76,7 +72,6 @@ impl MapArea {
         self.vpn_range = VPNRange::new(self.vpn_range.get_start(), new_end);
     }
 
-    #[allow(unused)]
     pub fn append_to(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
         for vpn in VPNRange::new(self.vpn_range.get_end(), new_end) {
             self.map_one(page_table, vpn)
@@ -88,6 +83,7 @@ impl MapArea {
     /// assume that all frames were cleared before
     pub fn copy_data(&mut self, page_table: &mut PageTable, data: &[u8]) {
         assert_eq!(self.map_type, MapType::Framed);
+
         let mut start: usize = 0;
         let mut current_vpn = self.vpn_range.get_start();
         let len = data.len();
@@ -99,10 +95,12 @@ impl MapArea {
                 .ppn()
                 .get_bytes_array()[..src.len()];
             dst.copy_from_slice(src);
+
             start += PAGE_SIZE;
             if start >= len {
                 break;
             }
+
             current_vpn.step();
         }
     }
