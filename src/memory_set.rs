@@ -1,5 +1,7 @@
 use alloc::vec::Vec;
-use page_table::{PTEFlags, PageTable, PageTableEntry, PhysPageNum, VirtAddr, VirtPageNum};
+use page_table::{
+    PTEFlags, PageTable, PageTableEntry, PhysAddr, PhysPageNum, VirtAddr, VirtPageNum,
+};
 
 use super::{map_type::MapType, memory_area::MapArea, MapPermission};
 use core::arch::asm;
@@ -84,5 +86,35 @@ impl MemorySet {
         } else {
             false
         }
+    }
+
+    /// clone the memory set
+    pub fn from_existed_user(
+        user_space: &Self,
+        trampline_start_va: usize,
+        trampline_start_pa: usize,
+    ) -> Self {
+        let mut memory_set = Self::new_bare();
+
+        memory_set.map_trampoline(
+            VirtAddr::from(trampline_start_va).into(),
+            PhysAddr::from(trampline_start_pa as usize).into(),
+        );
+
+        // copy data sections/trap_context/user_stack
+        for area in user_space.areas.iter() {
+            let new_area = MapArea::from_another(area);
+            memory_set.push(new_area, None);
+            // copy data from another space
+            for vpn in area.vpn_range {
+                let src_ppn = user_space.translate(vpn).unwrap().ppn();
+                let dst_ppn = memory_set.translate(vpn).unwrap().ppn();
+                dst_ppn
+                    .get_bytes_array()
+                    .copy_from_slice(src_ppn.get_bytes_array());
+            }
+        }
+        
+        memory_set
     }
 }
