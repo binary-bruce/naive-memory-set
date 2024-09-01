@@ -1,5 +1,6 @@
 #![no_std]
 
+mod elf;
 mod map_permission;
 mod map_type;
 mod memory_area;
