@@ -7,3 +7,4 @@ edition = "2021"
 riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
 bitflags = "1.2.1"
 page-table = { git = "https://github.com/binary-bruce/naive-page-table" }
+xmas-elf = "0.7.0"
